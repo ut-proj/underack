@@ -1,8 +1,8 @@
 # underack
 
 [![Build Status][gh-actions-badge]][gh-actions]
-[![LFE Versions][lfe badge]][lfe]
-[![Erlang Versions][erlang badge]][versions]
+[![LFE Versions][lfe-badge]][lfe]
+[![Erlang Versions][erlang-badge]][versions]
 
 [![][logo]][logo-large]
 
@@ -39,6 +39,8 @@ Apache 2.0
 [logo-large]: priv/images/logo-v1-x1000.png
 [github]: https://github.com/ut-proj/undermidi
 [gh-actions-badge]: https://github.com/ut-proj/underack/workflows/ci%2Fcd/badge.svg
+[gh-actions]: https://github.com/ut-proj/underack/actions
 [lfe-badge]: https://img.shields.io/badge/lfe-2.1+-blue.svg
+[lfe]: https://github.com/lfe/lfe
 [erlang-badge]: https://img.shields.io/badge/erlang-25%20to%2027-blue.svg
 [versions]: https://github.com/ut-proj/underack/blob/master/.github/workflows/cicd.yml
