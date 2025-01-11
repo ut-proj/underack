@@ -29,6 +29,14 @@ Whereas Eurorack modules take voltages as inputs and provide them as outputs, un
 * convert a set of MIDI values to specific MIDI message types, and
 * send these messages to the desired MIDI deivce (hardware or software).
 
+## Running
+
+Clone the repo, `cd` into the dir, and run the following:
+
+```
+rebar3 as underack repl
+```
+
 ## License
 
 Apache 2.0

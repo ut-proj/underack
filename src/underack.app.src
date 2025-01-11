@@ -1,0 +1,19 @@
+{application, 'underack', [
+    {description, "A Eurorack-inspired, modular, MIDI generation and manipulation system"},
+    {vsn, "0.1.0-dev"},
+    {registered, []},
+    {mod, {'underack-app', []}},
+    {applications, [
+        kernel,
+        stdlib,
+        logjam,
+        lfe
+        %%undermidi
+    ]},
+    {env,[]},
+    {modules, []},
+
+    {licenses, ["Apache 2.0"]},
+    {links, []},
+    {exclude_paths, ["priv"]}
+ ]}.
