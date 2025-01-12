@@ -8,6 +8,8 @@
   (export
     (init 1)))
 
+(include-lib "logjam/include/logjam.hrl")
+
 ;;; ----------------
 ;;; config functions
 ;;; ----------------
@@ -24,6 +26,7 @@
 ;;; -------------------------
 
 (defun start_link ()
+  (log-info "Starting underack top-level supervisor ...") 
   (supervisor:start_link `#(local ,(SERVER))
                          (MODULE)
                          (supervisor-opts)))
