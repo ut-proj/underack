@@ -3,10 +3,12 @@
 [![Build Status][gh-actions-badge]][gh-actions]
 [![LFE Versions][lfe-badge]][lfe]
 [![Erlang Versions][erlang-badge]][versions]
-
-[![][logo]][logo-large]
+[![Tags][github-tags-badge]][github-tags]
+[![Downloads][hex-downloads]][hex-package]
 
 *A Eurorack-inspired, modular, MIDI generation and manipulation system*
+
+[![][logo]][logo-large]
 
 ## About
 
@@ -47,3 +49,9 @@ Apache 2.0
 [lfe]: https://github.com/lfe/lfe
 [erlang-badge]: https://img.shields.io/badge/erlang-25%20to%2027-blue.svg
 [versions]: https://github.com/ut-proj/underack/blob/master/.github/workflows/cicd.yml
+[github-tags]: https://github.com/ut-proj/underack/tags
+[github-tags-badge]: https://img.shields.io/github/tag/ut-proj/underack.svg
+[github-downloads]: https://img.shields.io/github/downloads/ut-proj/underack/total.svg
+[hex-badge]: https://img.shields.io/hexpm/v/underack.svg?maxAge=2592000
+[hex-package]: https://hex.pm/packages/underack
+[hex-downloads]: https://img.shields.io/hexpm/dt/underack.svg
