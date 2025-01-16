@@ -12,7 +12,10 @@
     {env,[]},
     {modules, []},
 
-    {licenses, ["Apache 2.0"]},
-    {links, []},
-    {exclude_paths, ["priv"]}
+    {licenses, ["Apache-2.0"]},
+    {links, [
+      {"GitHub", "https://github.com/ut-proj/underack"},
+      {"Hex", "https://hex.pm/packages/underack"}
+    ]},
+    {exclude_paths, ["priv/images"]}
  ]}.
