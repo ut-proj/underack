@@ -20,7 +20,8 @@
   (json-file:write 'data (format-module-file rack-name timestamp module-name) binary))
 
 (defun format-ts (time-tuple)
-  "")
+  (let ((`#(#(,Y ,M ,D) #(,h ,m ,s)) (calendar:now_to_datetime time-tuple)))
+    (io_lib:format "~B~2.10.0B~2.10.0B.~2.10.0B~2.10.0B~2.10.0B" (list Y M D h m s))))
 
 (defun format-rack-path
   ((rack-name timestamp) (when (is_atom rack-name))
