@@ -49,7 +49,7 @@ Apache 2.0
 [gh-actions]: https://github.com/ut-proj/underack/actions
 [lfe-badge]: https://img.shields.io/badge/lfe-2.1+-blue.svg
 [lfe]: https://github.com/lfe/lfe
-[erlang-badge]: https://img.shields.io/badge/erlang-25%20to%2027-blue.svg
+[erlang-badge]: https://img.shields.io/badge/erlang-25+-blue.svg
 [versions]: https://github.com/ut-proj/underack/blob/master/.github/workflows/cicd.yml
 [github-tags]: https://github.com/ut-proj/underack/tags
 [github-tags-badge]: https://img.shields.io/github/tag/ut-proj/underack.svg
