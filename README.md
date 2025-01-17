@@ -34,6 +34,8 @@ Clone the repo, `cd` into the dir, and run the following:
 rebar3 as underack repl
 ```
 
+Note that if you don't use the `as underack` rebar3 profile subcommand, you'll get the LFE banner printed to stdout, in addition to the underack banner.
+
 ## License
 
 Apache 2.0

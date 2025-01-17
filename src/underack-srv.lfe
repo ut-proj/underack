@@ -73,7 +73,8 @@
   ((`#(EXIT ,pid ,reason) state)
    (io:format "Process ~p exited! (Reason: ~p)~n" `(,pid ,reason))
    `#(noreply ,state))
-  ((_msg state)
+  ((msg state)
+   (log-debug "Unknwon msg: ~p" `(,msg))
    `#(noreply ,state)))
 
 (defun terminate (_reason _state)

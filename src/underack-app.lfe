@@ -24,6 +24,7 @@
     (underack-sup:start_link)))
 
 (defun stop (state)
+  (um.nif:deinitialise)
   (undermidi:stop state)
   (underack-sup:stop)
   'ok)
