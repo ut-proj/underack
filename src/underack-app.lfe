@@ -13,7 +13,7 @@
 
 (defun start (type args)
   (let* ((app 'underack)
-         (cfg-name "config/sys.config")
+         (cfg-name (underack.config:get))
          (cfg-file (lutil-file:priv app cfg-name))
          (cfg (lutil-file:read-priv-config app cfg-name)))
     (undermidi.app:start type args cfg-file cfg)
