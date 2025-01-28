@@ -41,6 +41,7 @@
 (defun init (_args)
   `#(ok #(,(sup-flags) (,(child 'underack-srv 'start_link '())
                         ,(child 'underack-busboard 'start_link '())
+                        ,(child 'underack-cables 'start_link '())
                         ))))
 
 ;;; -----------------
