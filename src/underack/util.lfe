@@ -1,6 +1,8 @@
 (defmodule underack.util
   (export
-   (banner 0)))
+   (banner 0)
+   (data-dir 0)
+   (timestamp 0)))
 
 (defun banner ()
   (let ((prompt "lfe> ")

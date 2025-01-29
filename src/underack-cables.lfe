@@ -31,7 +31,7 @@
    (table-info 0)
    (table-name 0)
    (export 0) (export 1)
-   (get-export-files 0)
+   (list-exports 0)
    (import 1))
   ;; debug API
   (export
@@ -238,11 +238,12 @@
 (defun export (filename)
   (case (ets:tab2file (table-name)
                       filename
-                      '(#(extended_info (md5sum object_count)) #(sync true)))
+                      '(#(extended_info (md5sum object_count))
+                        #(sync true)))
     ('ok `#m(file ,filename table ,(table-name)))
     (err err)))
 
-(defun export-files ()
+(defun list-exports ()
   (filelib:fold_files (underack.util:data-dir)
                       (io_lib:format "~p-.*\.ets" (list (table-name)))
                       'false
@@ -250,8 +251,9 @@
                       '()))
 
 (defun import (filename)
+  (ets:delete (underack-cables:table-name))
   (case (ets:file2tab filename '(#(verify true)))
-    ('ok `#m(file ,filename table ,(table-name)))
+    (`#(ok ,table-name) `#m(file ,filename table ,table-name))
     (err err)))
 
 ;;;;;::=-----------------=::;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
