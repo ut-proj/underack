@@ -1,4 +1,4 @@
-(defmodule underack-srv
+(defmodule underack.manager
   (behaviour gen_server)
   ;; gen_server implementation
   (export

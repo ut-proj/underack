@@ -1,4 +1,4 @@
-(defmodule underack-app
+(defmodule underack.app
   (behaviour application)
   ;; app implementation
   (export
@@ -13,18 +13,18 @@
 
 (defun start (type args)
   (let* ((app 'underack)
-         (cfg-name (underack.config:get))
+         (cfg-name (ur.core.config:get))
          (cfg-file (lutil-file:priv app cfg-name))
          (cfg (lutil-file:read-priv-config app cfg-name)))
     (undermidi.app:start type args cfg-file cfg)
     (log-info "Starting underack OTP application ..." '())
-    (io:format "~s" (list (underack.util:banner)))
+    (io:format "~s" (list (underack:banner)))
     (log-notice "Starting underack, version ~s ..." (list (underack:version)))
     (log-debug "\nVersions:\n~p\n" (list (underack:versions)))
-    (underack-sup:start_link)))
+    (underack.supervisor:start_link)))
 
 (defun stop (state)
   (um.nif:deinitialise)
   (undermidi:stop state)
-  (underack-sup:stop)
+  (underack.supervisor:stop)
   'ok)

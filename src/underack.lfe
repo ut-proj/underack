@@ -2,11 +2,15 @@
 
 (defmodule underack
   (export
+   (banner 0)
    (version 0)
    (versions 0)))
 
+(defun banner ()
+  (ur.core.util:banner))
+
 (defun version ()
-  (underack.vers:version))
+  (ur.core.vers:version))
 
 (defun versions ()
-  (underack.vers:versions))
+  (ur.core.vers:versions))

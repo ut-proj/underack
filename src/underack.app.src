@@ -2,7 +2,7 @@
     {description, "A Eurorack-inspired, modular, MIDI generation and manipulation system"},
     {vsn, "0.1.0-dev"},
     {registered, []},
-    {mod, {'underack-app', []}},
+    {mod, {'underack.app', []}},
     {applications, [
         kernel,
         stdlib,

@@ -1,4 +1,4 @@
-(defmodule underack.util
+(defmodule ur.core.util
   (export all))
 
 (defun banner ()

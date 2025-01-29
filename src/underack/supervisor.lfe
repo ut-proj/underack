@@ -1,4 +1,4 @@
-(defmodule underack-busboard
+(defmodule underack.supervisor
   (behaviour supervisor)
   ;; supervisor implementation
   (export
@@ -6,10 +6,7 @@
    (stop 0))
   ;; callback implementation
   (export
-   (init 1))
-  ;; API implementation
-  (export
-   (add 3)))
+    (init 1)))
 
 (include-lib "logjam/include/logjam.hrl")
 
@@ -42,15 +39,10 @@
 ;;; -----------------------
 
 (defun init (_args)
-  `#(ok #(,(sup-flags) ())))
-
-;;; -------------
-;;; API functions
-;;; -------------
-
-(defun add (mod fun args)
-  (log-info "Adding underack module ~p with args ~p ..." (list mod args)) 
-  (supervisor:start_child (SERVER) (child mod fun args)))
+  `#(ok #(,(sup-flags) (,(child 'underack.manager 'start_link '())
+                        ,(child 'underack.busboard 'start_link '())
+                        ,(child 'underack.cables 'start_link '())
+                        ))))
 
 ;;; -----------------
 ;;; private functions

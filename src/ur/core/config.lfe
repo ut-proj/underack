@@ -1,4 +1,4 @@
-(defmodule underack.config
+(defmodule ur.core.config
   (export all))
 
 (defun default-config () "config/sys.config")

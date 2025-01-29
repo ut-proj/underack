@@ -1,4 +1,4 @@
-(defmodule underack.vers
+(defmodule ur.core.vers
   (export
    (version 0)
    (versions 0)))

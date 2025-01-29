@@ -1,7 +1,7 @@
 ;;;; This gen_server is for keeping track of all underack module outputs
 ;;;; and the other underack modules (subscribers) using these as inputs,
 ;;;; thus the analogy to physical cables.
-(defmodule underack-cables
+(defmodule underack.cables
   (behaviour gen_server)
   ;; gen_server implementation
   (export
