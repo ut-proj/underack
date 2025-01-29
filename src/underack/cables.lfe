@@ -80,7 +80,7 @@
 (defun init
   (((= `#m(ets #m(name ,table-name opts ,table-opts)) state))
    (log-debug "Initialising ~s ..." `(,(NAME)))
-   (underack.state:import-or-new table-name table-opts)
+   (ur.core.data:import-or-new table-name table-opts)
    (log-debug "ETS table info: ~p" `(,(undermidi.util:table-info table-name)))
    (erlang:process_flag 'trap_exit 'true)
    `#(ok ,state)))
@@ -186,30 +186,17 @@
   `#(,publisher ,subscriber))
 
 (defun list-all ()
-  (ets:select (table-name) (ets-ms (((tuple a b))
-                                    (tuple a b)))))
+  (ur.core.data:kv-all (table-name)))
 
 (defun list-inputs ()
-  (list-comp ((<- input
-                  (when (=/= input 'undefined))
-                  (lists:uniq
-                   (ets:select (table-name) (ets-ms (((tuple a b))
-                                                     b))))))
-    input))
+  (ur.core.data:kv-all-vs (table-name)))
+
+(defun list-outputs ()
+  (ur.core.data:kv-all-ks (table-name)))
 
 (defun list-inputs (publisher)
   "Get a publisher's full list of subscribers."
-  (list-comp ((<- input
-                  (when (=/= input 'undefined))
-                  (ets:select (table-name) (ets-ms (((tuple a b))
-                                                    (when (== a publisher))
-                                                    b)))))
-    input))
-
-(defun list-outputs ()
-  (lists:uniq
-   (ets:select (table-name) (ets-ms (((tuple a b))
-                                     a)))))
+  (ur.core.data:kv-all-vs (table-name) publisher))
 
 (defun connect
   ((`#m(output ,publisher input ,subscriber)) (when (is_atom subscriber))
@@ -228,28 +215,28 @@
   (connect publisher 'undefined))
 
 (defun remove-input (publisher subscriber)
-  (ets:delete_object (table-name) (make-row publisher subscriber)))
+  (ur.core.data:del-row (table-name) (make-row publisher subscriber)))
 
 (defun remove-output (publisher)
-  (ets:delete (table-name) publisher))
+  (ur.core.data:del-key-rows (table-name) publisher))
 
 (defun table-info ()
-  (underack.state:table-info (table-name)))
+  (ur.core.data:table-info (table-name)))
 
 (defun export ()
-  (underack.state:export (table-name)))
+  (ur.core.data:export (table-name)))
 
 (defun export (filename)
-  (underack.state:export (table-name) filename))
+  (ur.core.data:export (table-name) filename))
 
 (defun list-exports ()
-  (underack.state:list-exports (table-name)))
+  (ur.core.data:list-exports (table-name)))
 
 (defun import ()
-  (underack.state:import (table-name)))
+  (ur.core.data:import (table-name)))
 
 (defun import (filename)
-  (underack.state:re-import (table-name) filename))
+  (ur.core.data:re-import (table-name) filename))
 
 ;;;;;::=-----------------=::;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;::=-   debugging API   -=::;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

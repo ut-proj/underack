@@ -1,70 +1,95 @@
 (defmodule underack.state
-  (export all))
-
-(defun dir ()
-  (let ((path (dirs:data '(underack data))))
-    (case (filelib:ensure_path path)
-      ('ok path)
-      (err err))))
-
-(defun table-file-pattern (name-atom)
-  (io_lib:format "~p-.*\.ets" (list name-atom)))
-
-(defun table-file (name-atom)
-  (io_lib:format "~p-~s.ets" (list name-atom (underack.util:timestamp))))
-
-(defun table-info (name-atom)
-  (undermidi.util:table-info name-atom))
-
-(defun export (name-atom)
+  (behaviour gen_server)
+  ;; gen_server implementation
   (export
-   name-atom
-   (filename:join (dir) (table-file name-atom))))
+   (start_link 0)
+   (stop 0))
+  ;; callback implementation
+  (export
+   (init 1)
+   (handle_call 3)
+   (handle_cast 2)
+   (handle_info 2)
+   (terminate 2)
+   (code_change 3))
+  ;; server API
+  (export
+   (pid 0)
+   (echo 1)))
 
-(defun export (name-atom filename)
-  (case (ets:tab2file name-atom
-                      filename
-                      '(#(extended_info (md5sum object_count))
-                        #(sync true)))
-    ('ok `#m(file ,filename table ,name-atom))
-    (err err)))
+(include-lib "logjam/include/logjam.hrl")
 
-(defun list-exports (name-atom)
-  (filelib:fold_files (dir)
-                      (table-file-pattern name-atom)
-                      'false
-                      (lambda (x acc) (++ acc (list x)))
-                      '()))
+;;; ----------------
+;;; config functions
+;;; ----------------
 
-(defun newest-table-file (name-atom)
-  (filelib:fold_files (dir)
-                      (table-file-pattern name-atom)
-                      'false
-                      (match-lambda
-                        ((curr-file (= `#m(mtime ,prev-mtime file ,prev-file) prev))
-                         (let ((curr-mtime (filelib:last_modified curr-file)))
-                           (if (> prev-mtime curr-mtime)
-                             prev
-                             `#m(mtime ,curr-mtime
-                                 file ,curr-file))))
-                        ((curr-file _)
-                         `#m(mtime ,(filelib:last_modified curr-file)
-                             file ,curr-file)))
-                      #m()))
+(defun SERVER () (MODULE))
+(defun NAME () "underack manager")
+(defun initial-state () '#())
+(defun genserver-opts () '())
+(defun unknown-command () #(error "Unknown command."))
 
-(defun re-import (name-atom filename)
-  (ets:delete name-atom)
-  (import name-atom filename))
+;;; -------------------------
+;;; gen_server implementation
+;;; -------------------------
 
-(defun import (name-atom filename)
-  (case (ets:file2tab filename '(#(verify true)))
-    (`#(ok ,table-name) `#m(file ,filename table ,table-name))
-    (err err)))
+(defun start_link ()
+  (log-info "Starting ~s ..." (list (NAME))) 
+  (gen_server:start_link `#(local ,(SERVER))
+                         (MODULE)
+                         (initial-state)
+                         (genserver-opts)))
 
-(defun import (name-atom)
-  (import name-atom (newest-table-file name-atom)))
+(defun stop ()
+  (gen_server:call (SERVER) 'stop))
 
-(defun import-or-new (name-atom table-opts)
-  (case (newest-table-file name-atom)
-    (`#m(file ,prev-file) (import name-atom prev-file))
-    (_ (ets:new name-atom table-opts))))
+;;; -----------------------
+;;; callback implementation
+;;; -----------------------
+
+(defun init (state)
+  (log-debug "Initialising ~s ..." `(,(NAME)))
+  `#(ok ,state))
+
+(defun handle_cast (_msg state)
+  `#(noreply ,state))
+
+(defun handle_call
+  (('stop _from state)
+   (log-notice "Stopping ~s ..." (list (NAME)))
+    `#(stop shutdown ok ,state))
+  ((`#(echo ,msg) _from state)
+    `#(reply ,msg ,state))
+  ((message _from state)
+    `#(reply ,(unknown-command) ,state)))
+
+(defun handle_info
+  ((`#(EXIT ,_from normal) state)
+   (logger:info "~s is exiting (normal)." (list (NAME)))
+   `#(noreply ,state))
+  ((`#(EXIT ,_from shutdown) state)
+   (logger:info "~s is exiting (shutdown)." (list (NAME)))
+   `#(noreply ,state))
+  ((`#(EXIT ,pid ,reason) state)
+   (io:format "Process ~p exited! (Reason: ~p)~n" `(,pid ,reason))
+   `#(noreply ,state))
+  ((msg state)
+   (log-debug "Unknwon msg: ~p" `(,msg))
+   `#(noreply ,state)))
+
+(defun terminate (_reason _state)
+  (log-notice "Terminating ~s ..." (list (NAME)))
+  'ok)
+
+(defun code_change (_old-version state _extra)
+  `#(ok ,state))
+
+;;; --------------
+;;; our server API
+;;; --------------
+
+(defun pid ()
+  (erlang:whereis (SERVER)))
+
+(defun echo (msg)
+  (gen_server:call (SERVER) `#(echo ,msg)))
