@@ -45,3 +45,14 @@
 (defun priv-file (priv-rel-path)
   (filename:join (code:priv_dir 'underack)
                  priv-rel-path))
+
+(defun data-dir ()
+  (let ((path (dirs:data '(underack data))))
+    (case (filelib:ensure_path path)
+      ('ok path)
+      (err err))))
+
+(defun timestamp ()
+  (let ((`#(#(,Y ,M ,D) #(,h ,m ,s)) (calendar:now_to_local_time (erlang:timestamp))))
+    (lists:flatten
+     (io_lib:format "~B~2.10.0B~2.10.0B.~2.10.0B~2.10.0B~2.10.0B" (list Y M D h m s)))))

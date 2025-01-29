@@ -23,11 +23,16 @@
   ;; data API
   (export
    (select-all 0)
-   (select-inputs 1)
-   (add-input 2)
+   (select-inputs 0) (select-inputs 1)
+   (select-outputs 0)
+   (add-input 1) (add-input 2)
    (remove-input 2)
    (remove-output 1)
-   (table-info 0))
+   (table-info 0)
+   (table-name 0)
+   (export 0) (export 1)
+   (get-export-files 0)
+   (import 1))
   ;; debug API
   (export
    (echo 1)))
@@ -183,15 +188,31 @@
   (ets:select (table-name) (ets-ms (((tuple a b))
                                     (tuple a b)))))
 
+(defun select-inputs ()
+  (list-comp ((<- input
+                  (when (=/= input 'undefined))
+                  (lists:uniq
+                   (ets:select (table-name) (ets-ms (((tuple a b))
+                                                     b))))))
+    input))
+
 (defun select-inputs (publisher)
   "Get a publisher's full list of subscribers."
-  (ets:select (table-name) (ets-ms (((tuple a b))
-                                    (when (== a publisher))
-                                    b))))
+  (list-comp ((<- input
+                  (when (=/= input 'undefined))
+                  (ets:select (table-name) (ets-ms (((tuple a b))
+                                                    (when (== a publisher))
+                                                    b)))))
+    input))
 
 (defun select-outputs ()
-  (maps:keys (maps:from_list (underack-cables:select-all))))
+  (lists:uniq
+   (ets:select (table-name) (ets-ms (((tuple a b))
+                                     a)))))
 
+(defun add-input (publisher)
+  (add-input publisher 'undefined))
+  
 (defun add-input (publisher subscriber)
   (case (ets:insert (table-name)
                     (make-row publisher subscriber))
@@ -207,10 +228,35 @@
 (defun table-info ()
   (undermidi.util:table-info (table-name)))
 
+(defun export ()
+  (export
+   (filename:join
+    (underack.util:data-dir)
+    (io_lib:format "~p-~s.ets" (list (table-name)
+                                     (underack.util:timestamp))))))
+
+(defun export (filename)
+  (case (ets:tab2file (table-name)
+                      filename
+                      '(#(extended_info (md5sum object_count)) #(sync true)))
+    ('ok `#m(file ,filename table ,(table-name)))
+    (err err)))
+
+(defun export-files ()
+  (filelib:fold_files (underack.util:data-dir)
+                      (io_lib:format "~p-.*\.ets" (list (table-name)))
+                      'false
+                      (lambda (x acc) (++ acc (list x)))
+                      '()))
+
+(defun import (filename)
+  (case (ets:file2tab filename '(#(verify true)))
+    ('ok `#m(file ,filename table ,(table-name)))
+    (err err)))
+
 ;;;;;::=-----------------=::;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;::=-   debugging API   -=::;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;::=-----------------=::;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defun echo (msg)
   (gen_server:call (SERVER) `#(echo ,msg)))
-
