@@ -1,45 +1,70 @@
 (defmodule underack.state
   (export all))
 
-(defun read
-  ((rack-name) (when (is_atom rack-name))
-   (read rack-name (erlang:timestamp)))
-  ((path)
-   (json-file:read path)))
+(defun dir ()
+  (let ((path (dirs:data '(underack data))))
+    (case (filelib:ensure_path path)
+      ('ok path)
+      (err err))))
 
-(defun read (rack-name timestamp)
-  (json-file:read 'data (format-rack-file rack-name timestamp)))
+(defun table-file-pattern (name-atom)
+  (io_lib:format "~p-.*\.ets" (list name-atom)))
 
-(defun read (rack-name timestamp module-name)
-  (json-file:read 'data (format-module-file rack-name timestamp module-name)))
+(defun table-file (name-atom)
+  (io_lib:format "~p-~s.ets" (list name-atom (underack.util:timestamp))))
 
-(defun write (rack-name timestamp binary)
-  (json-file:write 'data (format-rack-file rack-name timestamp) binary))
+(defun table-info (name-atom)
+  (undermidi.util:table-info name-atom))
 
-(defun write (rack-name timestamp module-name binary)
-  (json-file:write 'data (format-module-file rack-name timestamp module-name) binary))
+(defun export (name-atom)
+  (export
+   name-atom
+   (filename:join (dir) (table-file name-atom))))
 
-(defun format-ts (time-tuple)
-  (let ((`#(#(,Y ,M ,D) #(,h ,m ,s)) (calendar:now_to_datetime time-tuple)))
-    (io_lib:format "~B~2.10.0B~2.10.0B.~2.10.0B~2.10.0B~2.10.0B" (list Y M D h m s))))
+(defun export (name-atom filename)
+  (case (ets:tab2file name-atom
+                      filename
+                      '(#(extended_info (md5sum object_count))
+                        #(sync true)))
+    ('ok `#m(file ,filename table ,name-atom))
+    (err err)))
 
-(defun format-rack-path
-  ((rack-name timestamp) (when (is_atom rack-name))
-   (format-rack-path (atom_to_list rack-name) timestamp))
-  ((rack-name timestamp) (when (is_tuple timestamp))
-   (format-rack-path rack-name (format-ts timestamp)))
-  ((rack-name timestamp)
-   (filename:join
-    (list "underack"
-          "state"
-          (io_lib:format "~s-~s" (list rack-name timestamp))))))
+(defun list-exports (name-atom)
+  (filelib:fold_files (dir)
+                      (table-file-pattern name-atom)
+                      'false
+                      (lambda (x acc) (++ acc (list x)))
+                      '()))
 
-(defun format-rack-file (rack-name timestamp)
-  (filename:join (format-rack-path rack-name timestamp) "rack.json"))
+(defun newest-table-file (name-atom)
+  (filelib:fold_files (dir)
+                      (table-file-pattern name-atom)
+                      'false
+                      (match-lambda
+                        ((curr-file (= `#m(mtime ,prev-mtime file ,prev-file) prev))
+                         (let ((curr-mtime (filelib:last_modified curr-file)))
+                           (if (> prev-mtime curr-mtime)
+                             prev
+                             `#m(mtime ,curr-mtime
+                                 file ,curr-file))))
+                        ((curr-file _)
+                         `#m(mtime ,(filelib:last_modified curr-file)
+                             file ,curr-file)))
+                      #m()))
 
-(defun format-module-file
-  ((rack-name timestamp module-name) (when (is_atom module-name))
-   (format-module-file rack-name timestamp (atom_to_list module-name)))
-  ((rack-name timestamp module-name)
-   (filename:join (list (format-rack-path rack-name timestamp)
-                        (io_lib:format "module-~s.json" (list module-name))))))
+(defun re-import (name-atom filename)
+  (ets:delete name-atom)
+  (import name-atom filename))
+
+(defun import (name-atom filename)
+  (case (ets:file2tab filename '(#(verify true)))
+    (`#(ok ,table-name) `#m(file ,filename table ,table-name))
+    (err err)))
+
+(defun import (name-atom)
+  (import name-atom (newest-table-file name-atom)))
+
+(defun import-or-new (name-atom table-opts)
+  (case (newest-table-file name-atom)
+    (`#m(file ,prev-file) (import name-atom prev-file))
+    (_ (ets:new name-atom table-opts))))

@@ -22,17 +22,18 @@
    (write 2) (write 3))
   ;; data API
   (export
-   (select-all 0)
-   (select-inputs 0) (select-inputs 1)
-   (select-outputs 0)
-   (add-input 1) (add-input 2)
+   (list-all 0)
+   (list-inputs 0) (list-inputs 1)
+   (list-outputs 0)
+   (add-output 1)
+   (connect 1) (connect 2)
    (remove-input 2)
    (remove-output 1)
    (table-info 0)
    (table-name 0)
    (export 0) (export 1)
    (list-exports 0)
-   (import 1))
+   (import 0) (import 1))
   ;; debug API
   (export
    (echo 1)))
@@ -79,7 +80,7 @@
 (defun init
   (((= `#m(ets #m(name ,table-name opts ,table-opts)) state))
    (log-debug "Initialising ~s ..." `(,(NAME)))
-   (ets:new table-name table-opts)
+   (underack.state:import-or-new table-name table-opts)
    (log-debug "ETS table info: ~p" `(,(undermidi.util:table-info table-name)))
    (erlang:process_flag 'trap_exit 'true)
    `#(ok ,state)))
@@ -89,9 +90,9 @@
   ((`#(state) _from state)
    `#(reply ,state ,state))
   ((`#(outputs) _from state)
-   `#(reply ,(select-all) ,state))
+   `#(reply ,(list-outputs) ,state))
   ((`#(inputs ,output) _from state)
-   `#(reply ,(select-inputs output) ,state))
+   `#(reply ,(list-inputs output) ,state))
   
   ;; Stop
   (('stop _from state)
@@ -152,16 +153,6 @@
 ;;;::=-   Cables API   -=::;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;::=--------------=::;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defun make-row (publisher subscriber)
-  "Pubsub terminology is used here to make the actual functionality as clear
-  as possible.
-
-  Unlike physical Eurorack setups, cables don't have to be 1:1 with output and
-  input slots; they can easily be 1:many. As such, the output process name is
-  the 'publisher' and however many rack modules want to consume that output,
-  may. Those named Erlang processes the 'subscribers.'"
-  `#(,publisher ,subscriber))
-
 (defun read ()
   (gen_server:call (SERVER) '#(devices)))
 
@@ -184,11 +175,21 @@
 ;;;::=-   ETS Data API   -=::;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;::=-----------------=::;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defun select-all ()
+(defun make-row (publisher subscriber)
+  "Pubsub terminology is used here to make the actual functionality as clear
+  as possible.
+
+  Unlike physical Eurorack setups, cables don't have to be 1:1 with output and
+  input slots; they can easily be 1:many. As such, the output process name is
+  the 'publisher' and however many rack modules want to consume that output,
+  may. Those named Erlang processes are the 'subscribers'."
+  `#(,publisher ,subscriber))
+
+(defun list-all ()
   (ets:select (table-name) (ets-ms (((tuple a b))
                                     (tuple a b)))))
 
-(defun select-inputs ()
+(defun list-inputs ()
   (list-comp ((<- input
                   (when (=/= input 'undefined))
                   (lists:uniq
@@ -196,7 +197,7 @@
                                                      b))))))
     input))
 
-(defun select-inputs (publisher)
+(defun list-inputs (publisher)
   "Get a publisher's full list of subscribers."
   (list-comp ((<- input
                   (when (=/= input 'undefined))
@@ -205,20 +206,27 @@
                                                     b)))))
     input))
 
-(defun select-outputs ()
+(defun list-outputs ()
   (lists:uniq
    (ets:select (table-name) (ets-ms (((tuple a b))
                                      a)))))
 
-(defun add-input (publisher)
-  (add-input publisher 'undefined))
-  
-(defun add-input (publisher subscriber)
+(defun connect
+  ((`#m(output ,publisher input ,subscriber)) (when (is_atom subscriber))
+   (connect publisher subscriber))
+  ((`#m(output ,publisher input ,subscribers)) (when (is_list subscribers))
+   (list-comp ((<- sub subscribers))
+     (connect publisher sub))))
+
+(defun connect (publisher subscriber)
   (case (ets:insert (table-name)
                     (make-row publisher subscriber))
     ('true 'ok)
     (err err)))
-  
+
+(defun add-output (publisher)
+  (connect publisher 'undefined))
+
 (defun remove-input (publisher subscriber)
   (ets:delete_object (table-name) (make-row publisher subscriber)))
 
@@ -226,35 +234,22 @@
   (ets:delete (table-name) publisher))
 
 (defun table-info ()
-  (undermidi.util:table-info (table-name)))
+  (underack.state:table-info (table-name)))
 
 (defun export ()
-  (export
-   (filename:join
-    (underack.util:data-dir)
-    (io_lib:format "~p-~s.ets" (list (table-name)
-                                     (underack.util:timestamp))))))
+  (underack.state:export (table-name)))
 
 (defun export (filename)
-  (case (ets:tab2file (table-name)
-                      filename
-                      '(#(extended_info (md5sum object_count))
-                        #(sync true)))
-    ('ok `#m(file ,filename table ,(table-name)))
-    (err err)))
+  (underack.state:export (table-name) filename))
 
 (defun list-exports ()
-  (filelib:fold_files (underack.util:data-dir)
-                      (io_lib:format "~p-.*\.ets" (list (table-name)))
-                      'false
-                      (lambda (x acc) (++ acc (list x)))
-                      '()))
+  (underack.state:list-exports (table-name)))
+
+(defun import ()
+  (underack.state:import (table-name)))
 
 (defun import (filename)
-  (ets:delete (underack-cables:table-name))
-  (case (ets:file2tab filename '(#(verify true)))
-    (`#(ok ,table-name) `#m(file ,filename table ,table-name))
-    (err err)))
+  (underack.state:re-import (table-name) filename))
 
 ;;;;;::=-----------------=::;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;::=-   debugging API   -=::;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
