@@ -30,11 +30,22 @@ This project aims to provide sophisticated music-generation capability with very
 
 Clone the repo, `cd` into the dir, and run the following:
 
-```
+``` shell
 rebar3 as underack repl
 ```
 
 Note that if you don't use the `as underack` rebar3 profile subcommand, you'll get the LFE banner printed to stdout, in addition to the underack banner.
+
+## Notes
+
+``` lisp
+(underack-cables:add-output 'walk)
+(underack-cables:connect 'clock 'random)
+(underack-cables:connect 'clock '(noise divider))
+(underack-cables:list-outputs)
+(underack-cables:list-all)
+(underack-cables:export)
+```
 
 ## License
 
