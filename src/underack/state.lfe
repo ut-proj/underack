@@ -14,8 +14,9 @@
    (code_change 3))
   ;; server API
   (export
-   (pid 0)
-   (echo 1)))
+   (export 0)
+   (list-exports 0)
+   (import 0)))
 
 (include-lib "logjam/include/logjam.hrl")
 
@@ -24,10 +25,22 @@
 ;;; ----------------
 
 (defun SERVER () (MODULE))
-(defun NAME () "underack manager")
+(defun NAME () "underack state manager")
 (defun initial-state () '#())
 (defun genserver-opts () '())
 (defun unknown-command () #(error "Unknown command."))
+
+(defun tables ()
+  (list
+   (underack.rack:ets)
+   (underack.modules:ets)
+   (underack.cables:ets)))
+
+(defun init-tables ()
+  (list-comp ((<- (= `#m(name ,name opts ,opts) table) (tables)))
+    (progn
+      (ur.core.data:import-or-new name opts)
+      (log-debug "ETS table info: ~p" `(,(undermidi.util:table-info name))))))
 
 ;;; -------------------------
 ;;; gen_server implementation
@@ -49,6 +62,8 @@
 
 (defun init (state)
   (log-debug "Initialising ~s ..." `(,(NAME)))
+  (init-tables)
+  (erlang:process_flag 'trap_exit 'true)
   `#(ok ,state))
 
 (defun handle_cast (_msg state)
@@ -84,12 +99,18 @@
 (defun code_change (_old-version state _extra)
   `#(ok ,state))
 
-;;; --------------
-;;; our server API
-;;; --------------
+;;; ------------
+;;; ETS Data API
+;;; ------------
 
-(defun pid ()
-  (erlang:whereis (SERVER)))
+(defun export ()
+  (list-comp ((<- `#m(name ,table-name) (tables)))
+    (ur.core.data:export table-name)))
 
-(defun echo (msg)
-  (gen_server:call (SERVER) `#(echo ,msg)))
+(defun list-exports ()
+  (list-comp ((<- `#m(name ,table-name) (tables)))
+    (ur.core.data:list-exports table-name)))
+
+(defun import ()
+  (list-comp ((<- `#m(name ,table-name) (tables)))
+    (ur.core.data:import table-name)))

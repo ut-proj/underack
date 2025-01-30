@@ -22,6 +22,7 @@
    (write 2) (write 3))
   ;; data API
   (export
+   (ets 0)
    (list-all 0)
    (list-inputs 0) (list-inputs 1)
    (list-outputs 0)
@@ -80,8 +81,6 @@
 (defun init
   (((= `#m(ets #m(name ,table-name opts ,table-opts)) state))
    (log-debug "Initialising ~s ..." `(,(NAME)))
-   (ur.core.data:import-or-new table-name table-opts)
-   (log-debug "ETS table info: ~p" `(,(undermidi.util:table-info table-name)))
    (erlang:process_flag 'trap_exit 'true)
    `#(ok ,state)))
 
