@@ -36,6 +36,12 @@ rebar3 as underack repl
 
 Note that if you don't use the `as underack` rebar3 profile subcommand, you'll get the LFE banner printed to stdout, in addition to the underack banner.
 
+## Status
+
+underack is currently under active initial development. Project planning is being done here:
+
+* https://github.com/orgs/ut-proj/projects/5
+
 ## Notes
 
 ``` lisp
