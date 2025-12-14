@@ -1,7 +1,7 @@
 # underack Code Review Report
 
-**Date:** December 2024  
-**Reviewer:** Claude  
+**Date:** December 2025
+**Reviewer:** Claude
 **Scope:** All source files in ut-proj/underack as of current development state
 
 ---
@@ -56,12 +56,14 @@ Supervisors aren't gen_servers—this call will fail. The same issue exists in `
 **3. Inconsistent shutdown reasons in `handle_call`**
 
 `underack.state:handle_call` returns `shutdown`:
+
 ```lisp
 (('stop _from state)
    `#(stop shutdown ok ,state))
 ```
 
 But `underack.cables:handle_call` returns `normal`:
+
 ```lisp
 (('stop _from state)
    `#(stop normal ok ,state))
@@ -91,6 +93,7 @@ In `underack.state:init/1`, tables are created via `(init-tables)`. But `underac
 **1. Unused bound variables not prefixed with `_`**
 
 In `underack.cables:init/1`:
+
 ```lisp
 (defun init
   (((= `#m(ets #m(name ,table-name opts ,table-opts)) state))
@@ -209,6 +212,7 @@ Issue #9 describes batch generation with caching, but no code structure exists y
 **3. Module lifecycle unclear**
 
 `ur.mod:add/1` adds a module to the busboard, but:
+
 - How does a module register its outputs with the cables table?
 - How does a module discover and subscribe to other modules' outputs?
 - Who owns this initialization?
