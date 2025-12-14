@@ -9,16 +9,6 @@ Before starting, ensure:
 2. `gh` CLI is authenticated (`gh auth status`)
 3. The repository is `ut-proj/underack`
 
-## Label Setup
-
-First, ensure the required labels exist. Run these commands (they'll fail gracefully if labels already exist):
-
-```bash
-gh label create "epic" --color "6A0DAD" --description "High-level release milestone" 2>/dev/null || echo "epic label exists"
-gh label create "feature" --color "FF8C00" --description "Feature-level work item" 2>/dev/null || echo "feature label exists"
-gh label create "task" --color "0E8A16" --description "Task-level work item" 2>/dev/null || echo "task label exists"
-```
-
 ## Issue Hierarchy Structure
 
 ```
@@ -52,21 +42,18 @@ Epic: underack 0.1.0 Release
 
 ---
 
-## Step 1: Create the Epic
+## Step 1: Update the old Epic
 
-Create the epic issue with checkbox items for each feature. The checkboxes enable GitHub's "Convert to issue" feature.
+The GH issue #1 for ut-proj/underack is the original epic. You need to:
 
-```bash
-gh issue create \
-  --title "underack 0.1.0 Release" \
-  --label "epic" \
-  --body "## Overview
+- preserve the current/original description by copying it and pasting it into a comment on the issue 
+- update this epic issue with checkbox items for each feature. The checkboxes enable GitHub's "Convert to issue" feature.
 
 This epic tracks all work required for the first public release of underack, a Eurorack-inspired MIDI generation and manipulation system.
 
 ## Design Document
 
-See: [underack Design Document](docs/design-0.1.0.md) (or link to your design doc location)
+See: [underack Design Document](docs/design/000-underack-design-document.md)
 
 ## Features
 
@@ -89,12 +76,12 @@ The following features comprise this release:
 
 ## Links
 
-- [Design Document](docs/design-0.1.0.md)
+- See Design Document link above
 - [Project Board](https://github.com/orgs/ut-proj/projects/5)
 "
 ```
 
-**Note the issue number returned** (e.g., `#12`). You'll reference this as `EPIC_NUMBER` below.
+**Note the issue number returned** (e.g., `#1`). You'll reference this as `EPIC_NUMBER` below.
 
 ---
 
@@ -298,21 +285,9 @@ Final integration, testing, documentation, and release preparation.
 
 ---
 
-## Step 3: Convert Checkbox Items to Sub-Issues
+## Step 3: Create Task Issues via CLI
 
-After creating the feature issues, go to each one in the GitHub web UI:
-
-1. Open the feature issue
-2. In the description, hover over each checkbox item
-3. Click the "Convert to issue" icon that appears (circle with dot)
-4. GitHub creates a new issue linked to the checkbox
-5. Add the "task" label to each newly created issue
-
-**Note:** As of late 2024, `gh` CLI doesn't directly support creating sub-issues from task list items. This step requires the web UI or GitHub's GraphQL API.
-
-### Alternative: Create Task Issues via CLI
-
-If you prefer to create task issues directly via CLI (without the checkbox linking), you can run commands like:
+After creating the feature issues, create task issues directly via CLI (without the checkbox linking), running commands like:
 
 ```bash
 # Example: Create a task issue and reference its parent feature
@@ -386,15 +361,10 @@ Replace `F1_NUMBER` through `F7_NUMBER` with actual issue numbers.
 ## Quick Reference: All Commands in Sequence
 
 ```bash
-# 1. Ensure labels exist
-gh label create "epic" --color "6A0DAD" --description "High-level release milestone" 2>/dev/null || true
-gh label create "feature" --color "FF8C00" --description "Feature-level work item" 2>/dev/null || true
-gh label create "task" --color "0E8A16" --description "Task-level work item" 2>/dev/null || true
 
-# 2. Create epic (note the returned issue number)
-gh issue create --title "underack 0.1.0 Release" --label "epic" --body "..."
+# 1. Update epic 
 
-# 3. Create each feature issue (note returned numbers)
+# 2. Create each feature issue (note returned numbers)
 gh issue create --title "Foundation Infrastructure" --label "feature" --body "..."
 gh issue create --title "Clock Module" --label "feature" --body "..."
 gh issue create --title "Modulation Modules" --label "feature" --body "..."
@@ -403,10 +373,10 @@ gh issue create --title "Sequencing Modules" --label "feature" --body "..."
 gh issue create --title "Output Modules" --label "feature" --body "..."
 gh issue create --title "Integration & Release" --label "feature" --body "..."
 
-# 4. Edit epic to link feature issues
+# 3. Edit epic to link feature issues
 gh issue edit EPIC_NUMBER --body "...(with issue numbers)..."
 
-# 5. Create task issues OR use web UI to convert checkboxes
+# 4. Create task issues 
 ```
 
 ---
@@ -416,8 +386,7 @@ gh issue edit EPIC_NUMBER --body "...(with issue numbers)..."
 1. **Run commands one at a time** and note the issue numbers returned
 2. **Build a mapping** of issue numbers as you go (epic → features → tasks)
 3. **Use `gh issue list`** to verify what's been created
-4. **The web UI is required** for the checkbox → sub-issue conversion feature
-5. **Check existing issues first** with `gh issue list --state open` to avoid duplicates
+4. **Check existing issues first** with `gh issue list --state open` to avoid duplicates
 
 ---
 
