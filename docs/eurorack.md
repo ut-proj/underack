@@ -4,7 +4,7 @@ Aside from the obivous software vs. hardware and MIDI integers vs. voltages, thi
 
 ## Physical Analogues
 
-* Rack system 
+* Rack system
   * rails - NA
   * side plates - NA
   * covers - NA
