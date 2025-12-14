@@ -25,3 +25,4 @@ rebar3.crashdump
 priv/go
 rebar.lock
 /bin
+/docs/design/*.docx
