@@ -23,6 +23,7 @@ This project aims to provide sophisticated music-generation capability with very
 
 ## Details
 
+* [v0.1.0 Design Doc](./docs/design/000-underack-design-document.md/)
 * [System Architecture](./docs/arch.md)
 * [underack vs. Eurorack](./docs/eurorack.md)
 
@@ -40,7 +41,7 @@ Note that if you don't use the `as underack` rebar3 profile subcommand, you'll g
 
 underack is currently under active initial development. Project planning is being done here:
 
-* https://github.com/orgs/ut-proj/projects/5
+* <https://github.com/orgs/ut-proj/projects/5>
 
 ## Notes
 
@@ -61,7 +62,6 @@ Apache 2.0
 
 [logo]: priv/images/logo-v1-x250.png
 [logo-large]: priv/images/logo-v1-x1000.png
-[github]: https://github.com/ut-proj/undermidi
 [gh-actions-badge]: https://github.com/ut-proj/underack/workflows/ci%2Fcd/badge.svg
 [gh-actions]: https://github.com/ut-proj/underack/actions
 [lfe-badge]: https://img.shields.io/badge/lfe-2.1+-blue.svg
@@ -70,7 +70,5 @@ Apache 2.0
 [versions]: https://github.com/ut-proj/underack/blob/master/.github/workflows/cicd.yml
 [github-tags]: https://github.com/ut-proj/underack/tags
 [github-tags-badge]: https://img.shields.io/github/tag/ut-proj/underack.svg
-[github-downloads]: https://img.shields.io/github/downloads/ut-proj/underack/total.svg
-[hex-badge]: https://img.shields.io/hexpm/v/underack.svg?maxAge=2592000
 [hex-package]: https://hex.pm/packages/underack
 [hex-downloads]: https://img.shields.io/hexpm/dt/underack.svg
