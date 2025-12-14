@@ -26,3 +26,4 @@ priv/go
 rebar.lock
 /bin
 /docs/design/*.docx
+/.claude
